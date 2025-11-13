@@ -1,0 +1,479 @@
+    {
+      "info": {
+        "name": "Local Collaborative Workspace API",
+        "description": "Collection complète des API REST pour le Local Collaborative Workspace\n\nVersion: 1.5.0\nBase URL: http://localhost:8080",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+        {
+          "key": "baseUrl",
+          "value": "http://localhost:8080",
+          "type": "string"
+        }
+      ],
+      "item": [
+        {
+          "name": "Health & Config",
+          "item": [
+            {
+              "name": "Health Check",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "health"
+                  ]
+                },
+                "description": "Vérifie que le serveur est en ligne et fonctionnel"
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "GET",
+                    "url": "{{baseUrl}}/api/health"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"status\": \"ok\",\n  \"timestamp\": \"2025-10-24T21:35:30.713Z\",\n  \"version\": \"1.0.0\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "Get Configuration",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/config",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "config"
+                  ]
+                },
+                "description": "Récupère la configuration du serveur"
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "GET",
+                    "url": "{{baseUrl}}/api/config"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"maxFileSize\": 1073741824,\n  \"enableMDNS\": true\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Users",
+          "item": [
+            {
+              "name": "Get Connected Users",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                },
+                "description": "Récupère la liste des utilisateurs connectés via WebSocket"
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "GET",
+                    "url": "{{baseUrl}}/api/users"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"connectedUsers\": [],\n  \"totalConnected\": 0\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Database",
+          "item": [
+            {
+              "name": "Get Database Stats",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/database/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "database",
+                    "stats"
+                  ]
+                },
+                "description": "Récupère les statistiques de la base de données"
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "GET",
+                    "url": "{{baseUrl}}/api/database/stats"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"elementCount\": 0,\n  \"dbSize\": 4096,\n  \"dbPath\": \"./data/workspace.db\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "Create Database Backup",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/database/backup",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "database",
+                    "backup"
+                  ]
+                },
+                "description": "Crée un backup manuel de la base de données"
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "POST",
+                    "url": "{{baseUrl}}/api/database/backup"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"success\": true,\n  \"backupPath\": \"./data/backups/workspace-2025-10-24T17-46-24.db\",\n  \"message\": \"Backup créé avec succès\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Files",
+          "item": [
+            {
+              "name": "Upload File",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": [],
+                      "description": "Le fichier à uploader (requis)"
+                    },
+                    {
+                      "key": "uploadedBy",
+                      "value": "test-user",
+                      "type": "text",
+                      "description": "Nom de l'utilisateur (optionnel)"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/files/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "files",
+                    "upload"
+                  ]
+                },
+                "description": "Upload un fichier sur le serveur (max 1GB)"
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "POST",
+                    "url": "{{baseUrl}}/api/files/upload"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"filename\": \"test.txt\",\n    \"originalPath\": \"test.txt\",\n    \"storedPath\": \"abc123-def456.txt\",\n    \"mimeType\": \"text/plain\",\n    \"size\": 1024,\n    \"checksum\": \"sha256hash...\"\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "Download File",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/files/download/:filename",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "files",
+                    "download",
+                    ":filename"
+                  ],
+                  "variable": [
+                    {
+                      "key": "filename",
+                      "value": "abc123-def456.txt",
+                      "description": "Le nom du fichier stocké (storedPath)"
+                    }
+                  ]
+                },
+                "description": "Télécharge un fichier depuis le serveur"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete File",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/files/:filename",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "files",
+                    ":filename"
+                  ],
+                  "variable": [
+                    {
+                      "key": "filename",
+                      "value": "abc123-def456.txt",
+                      "description": "Le nom du fichier stocké"
+                    }
+                  ]
+                },
+                "description": "Supprime un fichier du serveur"
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "DELETE",
+                    "url": "{{baseUrl}}/api/files/abc123-def456.txt"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"deleted\": true\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "List Files",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/files/list",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "files",
+                    "list"
+                  ]
+                },
+                "description": "Récupère la liste de tous les fichiers stockés"
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "GET",
+                    "url": "{{baseUrl}}/api/files/list"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"abc123-def456\",\n      \"filename\": \"document.pdf\",\n      \"size\": 1024000,\n      \"mimeType\": \"application/pdf\",\n      \"uploadedAt\": \"2025-10-23T10:30:00.000Z\",\n      \"uploadedBy\": \"john\"\n    }\n  ]\n}"
+                }
+              ]
+            },
+            {
+              "name": "Get File Metadata",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/files/metadata/:fileId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "files",
+                    "metadata",
+                    ":fileId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "fileId",
+                      "value": "abc123-def456",
+                      "description": "L'ID du fichier (UUID)"
+                    }
+                  ]
+                },
+                "description": "Récupère les métadonnées d'un fichier spécifique"
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "GET",
+                    "url": "{{baseUrl}}/api/files/metadata/abc123-def456"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"abc123-def456\",\n    \"filename\": \"document.pdf\",\n    \"size\": 1024000,\n    \"mimeType\": \"application/pdf\",\n    \"uploadedAt\": \"2025-10-23T10:30:00.000Z\",\n    \"uploadedBy\": \"john\"\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "Get Storage Stats",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/files/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "files",
+                    "stats"
+                  ]
+                },
+                "description": "Récupère les statistiques de stockage des fichiers"
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "GET",
+                    "url": "{{baseUrl}}/api/files/stats"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"totalFiles\": 42,\n    \"totalSize\": 52428800\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "Verify File Integrity",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"checksum\": \"sha256hash...\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/files/verify/:filename",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "files",
+                    "verify",
+                    ":filename"
+                  ],
+                  "variable": [
+                    {
+                      "key": "filename",
+                      "value": "abc123-def456.txt",
+                      "description": "Le nom du fichier stocké"
+                    }
+                  ]
+                },
+                "description": "Vérifie l'intégrité d'un fichier en comparant son checksum"
+              },
+              "response": [
+                {
+                  "name": "Success - Valid",
+                  "originalRequest": {
+                    "method": "POST",
+                    "url": "{{baseUrl}}/api/files/verify/abc123-def456.txt"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"valid\": true\n  }\n}"
+                },
+                {
+                  "name": "Success - Invalid",
+                  "originalRequest": {
+                    "method": "POST",
+                    "url": "{{baseUrl}}/api/files/verify/abc123-def456.txt"
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"valid\": false\n  }\n}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
