@@ -1,5 +1,5 @@
-import React, { ReactNode } from 'react';
-import { CanvasElement } from '../../../../shared/types';
+import React, { ReactNode } from "react";
+import { CanvasElement } from "../../../../shared/types";
 
 export interface ElementRendererProps {
   element: CanvasElement;
@@ -8,14 +8,19 @@ export interface ElementRendererProps {
   scale: number;
   onClick: (event: React.MouseEvent) => void;
   onDoubleClick: () => void;
-  onDragStart: (event: React.MouseEvent | React.TouchEvent) => void;
+  onDragStart?: (
+    event: React.DragEvent | React.MouseEvent | React.TouchEvent,
+  ) => void;
+  onDragEnd?: (event: React.DragEvent) => void;
   onContextMenu?: (event: React.MouseEvent) => void;
   children?: ReactNode;
+  style?: React.CSSProperties;
+  draggable?: boolean;
+  onMouseDown?: (event: React.MouseEvent) => void;
+  onTouchStart?: (event: React.TouchEvent) => void;
 }
 
-export interface ElementRendererComponent {
-  (props: ElementRendererProps): React.ReactElement;
-}
+export type ElementRendererComponent = React.FC<ElementRendererProps>;
 
 export const BaseElementRenderer: React.FC<ElementRendererProps> = ({
   element,
@@ -24,8 +29,14 @@ export const BaseElementRenderer: React.FC<ElementRendererProps> = ({
   onClick,
   onDoubleClick,
   onDragStart,
+  onDragEnd,
   onContextMenu,
-  children
+  children,
+  style = {},
+  draggable = false,
+  onMouseDown,
+  onTouchStart,
+  ...rest
 }) => {
   const handleContextMenu = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -34,27 +45,32 @@ export const BaseElementRenderer: React.FC<ElementRendererProps> = ({
 
   return (
     <div
-      className={`canvas-element animate-fade-in ${isSelected ? 'selected' : ''} ${isDragging ? 'dragging' : ''}`}
+      className={`canvas-element animate-fade-in ${isSelected ? "selected" : ""} ${isDragging ? "dragging" : ""}`}
       style={{
         left: element.position.x,
         top: element.position.y,
         width: element.size.width,
         height: element.size.height,
-        backgroundColor: element.style?.backgroundColor || '#ffffff',
-        borderColor: element.style?.borderColor || '#e2e8f0',
+        backgroundColor: element.style?.backgroundColor || "#ffffff",
+        borderColor: element.style?.borderColor || "#e2e8f0",
         fontSize: element.style?.fontSize || 14,
-        transform: isDragging ? 'rotate(2deg)' : 'none',
-        boxShadow: isDragging ? '0 8px 25px rgba(0,0,0,0.15)' : undefined,
-        zIndex: isDragging ? 1000 : isSelected ? 100 : 1
+        transform: isDragging ? "rotate(2deg)" : "none",
+        boxShadow: isDragging ? "0 8px 25px rgba(0,0,0,0.15)" : undefined,
+        zIndex: isDragging ? 1000 : isSelected ? 100 : 1,
+        ...style,
       }}
+      draggable={draggable}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
-      onMouseDown={onDragStart}
-      onTouchStart={onDragStart}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       onContextMenu={handleContextMenu}
+      onMouseDown={onMouseDown}
+      onTouchStart={onTouchStart}
+      {...rest}
     >
       {children}
-      
+
       {/* Indicateur de sélection */}
       {isSelected && (
         <div className="absolute -inset-1 border-2 border-blue-500 rounded pointer-events-none">

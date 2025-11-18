@@ -18,15 +18,12 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": [
-    "src/client/**/*",
-    "src/shared/**/*"
-  ],
-  "exclude": [
-    "src/server/**/*",
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/client/**/*", "src/shared/**/*"],
+  "exclude": ["src/server/**/*", "node_modules", "dist"]
 }

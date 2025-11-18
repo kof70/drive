@@ -1,9 +1,10 @@
-import React from 'react';
-import { Notification, NotificationProps } from './Notification';
-import { useNotificationStore } from '../../stores/notificationStore';
+import React from "react";
+import { Notification, NotificationProps } from "./Notification";
+import { useNotificationStore } from "../../stores/notificationStore";
 
 export const NotificationManager: React.FC = () => {
-  const { notifications, removeNotification } = useNotificationStore();
+  const { notifications, removeNotification, addNotification } =
+    useNotificationStore();
 
   if (notifications.length === 0) {
     return null;

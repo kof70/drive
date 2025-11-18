@@ -1,12 +1,18 @@
-import React from 'react';
-import { WorkspaceLayout } from './components/layout/WorkspaceLayout';
-import { WebSocketProvider } from './providers/WebSocketProvider';
-import { NotificationManager } from './components/ui/NotificationManager';
+import { WorkspaceLayout } from "./components/layout/WorkspaceLayout";
+import { WorkspaceLayout2 } from "./components/layout/WorkspaceLayout2";
+import { NotificationManager } from "./components/shared/NotificationManager";
+import { WebSocketProvider } from "./providers/WebSocketProvider";
 
 function App() {
+  // return (
+  //   <WebSocketProvider>
+  //     <WorkspaceLayout />
+  //     <NotificationManager />
+  //   </WebSocketProvider>
+  // );
   return (
     <WebSocketProvider>
-      <WorkspaceLayout />
+      <WorkspaceLayout2 />
       <NotificationManager />
     </WebSocketProvider>
   );

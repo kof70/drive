@@ -1,5 +1,10 @@
-import { io, Socket } from 'socket.io-client';
-import { CanvasElement, ClipboardData, CursorPosition, UserSession } from '../../shared/types';
+import { io, Socket } from "socket.io-client";
+import {
+  CanvasElement,
+  ClipboardData,
+  CursorPosition,
+  UserSession,
+} from "../../shared/types";
 
 export interface WebSocketManagerConfig {
   serverUrl: string;
@@ -11,23 +16,23 @@ export interface WebSocketManagerConfig {
 
 export interface WebSocketEvents {
   // Événements entrants du serveur
-  'canvas-update': (data: CanvasElement) => void;
-  'canvas-state-sync': (elements: CanvasElement[]) => void;
-  'canvas-element-add': (element: CanvasElement) => void;
-  'canvas-element-remove': (elementId: string) => void;
-  'clipboard-sync': (data: ClipboardData) => void;
-  'user-cursor': (data: { userId: string; position: CursorPosition }) => void;
-  'file-upload': (data: any) => void;
-  'user-connected': (session: UserSession) => void;
-  'user-disconnected': (sessionId: string) => void;
-  'users-list': (users: UserSession[]) => void;
-  
+  "canvas-update": (data: CanvasElement) => void;
+  "canvas-state-sync": (elements: CanvasElement[]) => void;
+  "canvas-element-add": (element: CanvasElement) => void;
+  "canvas-element-remove": (elementId: string) => void;
+  "clipboard-sync": (data: ClipboardData) => void;
+  "user-cursor": (data: { userId: string; position: CursorPosition }) => void;
+  "file-upload": (data: any) => void;
+  "user-connected": (session: UserSession) => void;
+  "user-disconnected": (sessionId: string) => void;
+  "users-list": (users: UserSession[]) => void;
+
   // Événements de connexion
-  'connected': () => void;
-  'disconnected': (reason: string) => void;
-  'reconnecting': (attempt: number) => void;
-  'reconnected': () => void;
-  'error': (error: Error) => void;
+  connected: () => void;
+  disconnected: (reason: string) => void;
+  reconnecting: (attempt: number) => void;
+  reconnected: () => void;
+  error: (error: Error) => void;
 }
 
 export class WebSocketManager {
@@ -41,17 +46,18 @@ export class WebSocketManager {
 
   constructor(config: Partial<WebSocketManagerConfig> = {}) {
     // Utiliser l'URL actuelle du navigateur pour le WebSocket
-    const defaultServerUrl = typeof window !== 'undefined' 
-      ? `${window.location.protocol}//${window.location.host}`
-      : 'http://localhost:8080';
-    
+    const defaultServerUrl =
+      typeof window !== "undefined"
+        ? `${window.location.protocol}//${window.location.host}`
+        : "http://localhost:8080";
+
     this.config = {
       serverUrl: defaultServerUrl,
       reconnectionAttempts: Infinity, // Reconnexion infinie
       reconnectionDelay: 1000,
       maxReconnectionDelay: 30000,
       timeout: 20000,
-      ...config
+      ...config,
     };
   }
 
@@ -68,71 +74,78 @@ export class WebSocketManager {
       console.log(`🔌 Connexion à ${this.config.serverUrl}...`);
 
       this.socket = io(this.config.serverUrl, {
-        transports: ['websocket', 'polling'],
+        transports: ["websocket", "polling"],
         timeout: this.config.timeout,
         reconnection: true, // Activer la reconnexion automatique de Socket.io
         reconnectionAttempts: Infinity,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
         randomizationFactor: 0.5,
-        autoConnect: true
+        autoConnect: true,
       });
 
       // Gestionnaire de connexion réussie
-      this.socket.on('connect', () => {
+      this.socket.on("connect", () => {
         const isReconnection = this.reconnectionAttempt > 0;
-        console.log(isReconnection ? '✅ Reconnexion WebSocket réussie' : '✅ Connexion WebSocket établie');
+        console.log(
+          isReconnection
+            ? "✅ Reconnexion WebSocket réussie"
+            : "✅ Connexion WebSocket établie",
+        );
         this.isConnected = true;
-        
+
+        // Ajoute ce log pour diagnostiquer le flush
+        console.log("[WS CLIENT] Appel à flushMessageQueue après connexion");
+
         // Vider la file d'attente des messages
         this.flushMessageQueue();
-        
+
         // Si c'est une reconnexion, demander l'état actuel du canvas
         if (isReconnection) {
-          console.log('🔄 Demande de synchronisation de l\'état du canvas...');
-          this.socket.emit('request-canvas-state');
-          this.emit('reconnected');
+          console.log("🔄 Demande de synchronisation de l'état du canvas...");
+          this.socket?.emit("request-canvas-state");
+          this.emit("reconnected");
         }
-        
+
         this.reconnectionAttempt = 0;
-        
+
         // Émettre l'événement de connexion
-        this.emit('connected');
+        this.emit("connected");
         resolve();
       });
 
       // Gestionnaire de déconnexion
-      this.socket.on('disconnect', (reason) => {
+      this.socket.on("disconnect", (reason) => {
         console.log(`🔌 Déconnexion WebSocket: ${reason}`);
         this.isConnected = false;
-        this.emit('disconnected', reason);
-        
+        this.emit("disconnected", reason);
+
         // Socket.io gère automatiquement la reconnexion
         // On n'a plus besoin de startReconnection() manuel
       });
 
       // Gestionnaire de tentative de reconnexion (natif Socket.io)
-      this.socket.io.on('reconnect_attempt', (attempt) => {
+      this.socket.io.on("reconnect_attempt", (attempt) => {
         this.reconnectionAttempt = attempt;
         console.log(`🔄 Tentative de reconnexion ${attempt}...`);
-        this.emit('reconnecting', attempt);
+        this.emit("reconnecting", attempt);
       });
 
       // Gestionnaire d'erreur de reconnexion
-      this.socket.io.on('reconnect_error', (error) => {
-        console.error('❌ Erreur de reconnexion:', error);
+      this.socket.io.on("reconnect_error", (error) => {
+        console.error("❌ Erreur de reconnexion:", error);
       });
 
       // Gestionnaire d'échec de reconnexion
-      this.socket.io.on('reconnect_failed', () => {
-        console.error('❌ Échec de toutes les tentatives de reconnexion');
+      this.socket.io.on("reconnect_failed", () => {
+        console.error("❌ Échec de toutes les tentatives de reconnexion");
       });
 
       // Gestionnaire d'erreurs
-      this.socket.on('connect_error', (error) => {
-        console.error('❌ Erreur de connexion WebSocket:', error);
-        this.emit('error', error);
-        
+      this.socket.on("connect_error", (error) => {
+        console.error("❌ Erreur de connexion WebSocket:", error);
+        this.emit("error", error);
+
         if (!this.isConnected) {
           reject(error);
         }
@@ -158,13 +171,14 @@ export class WebSocketManager {
     }
 
     this.isConnected = false;
-    console.log('🔌 Connexion WebSocket fermée');
+    console.log("🔌 Connexion WebSocket fermée");
   }
 
   /**
    * Envoie un message au serveur
    */
   public send(event: string, data?: any): void {
+    console.log(`[WS CLIENT] Envoi event: ${event}`, data); // <-- log ajouté
     if (this.isConnected && this.socket) {
       this.socket.emit(event, data);
     } else {
@@ -179,7 +193,7 @@ export class WebSocketManager {
    */
   public on<K extends keyof WebSocketEvents>(
     event: K,
-    listener: WebSocketEvents[K]
+    listener: WebSocketEvents[K],
   ): void {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, new Set());
@@ -192,7 +206,7 @@ export class WebSocketManager {
    */
   public off<K extends keyof WebSocketEvents>(
     event: K,
-    listener: WebSocketEvents[K]
+    listener: WebSocketEvents[K],
   ): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
@@ -231,44 +245,47 @@ export class WebSocketManager {
   private setupBusinessEventHandlers(): void {
     if (!this.socket) return;
 
-    this.socket.on('canvas-update', (data: CanvasElement) => {
-      this.emit('canvas-update', data);
+    this.socket.on("canvas-update", (data: CanvasElement) => {
+      this.emit("canvas-update", data);
     });
 
-    this.socket.on('clipboard-sync', (data: ClipboardData) => {
-      this.emit('clipboard-sync', data);
+    this.socket.on("clipboard-sync", (data: ClipboardData) => {
+      this.emit("clipboard-sync", data);
     });
 
-    this.socket.on('user-cursor', (data: { userId: string; position: CursorPosition }) => {
-      this.emit('user-cursor', data);
+    this.socket.on(
+      "user-cursor",
+      (data: { userId: string; position: CursorPosition }) => {
+        this.emit("user-cursor", data);
+      },
+    );
+
+    this.socket.on("file-upload", (data: any) => {
+      this.emit("file-upload", data);
     });
 
-    this.socket.on('file-upload', (data: any) => {
-      this.emit('file-upload', data);
+    this.socket.on("user-connected", (session: UserSession) => {
+      this.emit("user-connected", session);
     });
 
-    this.socket.on('user-connected', (session: UserSession) => {
-      this.emit('user-connected', session);
+    this.socket.on("user-disconnected", (sessionId: string) => {
+      this.emit("user-disconnected", sessionId);
     });
 
-    this.socket.on('user-disconnected', (sessionId: string) => {
-      this.emit('user-disconnected', sessionId);
+    this.socket.on("users-list", (users: UserSession[]) => {
+      this.emit("users-list", users);
     });
 
-    this.socket.on('users-list', (users: UserSession[]) => {
-      this.emit('users-list', users);
+    this.socket.on("canvas-state-sync", (elements: CanvasElement[]) => {
+      this.emit("canvas-state-sync", elements);
     });
 
-    this.socket.on('canvas-state-sync', (elements: CanvasElement[]) => {
-      this.emit('canvas-state-sync', elements);
+    this.socket.on("canvas-element-add", (element: CanvasElement) => {
+      this.emit("canvas-element-add", element);
     });
 
-    this.socket.on('canvas-element-add', (element: CanvasElement) => {
-      this.emit('canvas-element-add', element);
-    });
-
-    this.socket.on('canvas-element-remove', (elementId: string) => {
-      this.emit('canvas-element-remove', elementId);
+    this.socket.on("canvas-element-remove", (elementId: string) => {
+      this.emit("canvas-element-remove", elementId);
     });
   }
 
@@ -281,7 +298,7 @@ export class WebSocketManager {
   ): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
-      listeners.forEach(listener => {
+      listeners.forEach((listener) => {
         try {
           (listener as any)(...args);
         } catch (error) {
@@ -296,14 +313,17 @@ export class WebSocketManager {
    */
   private flushMessageQueue(): void {
     if (this.messageQueue.length > 0) {
-      console.log(`📤 Envoi de ${this.messageQueue.length} messages en attente`);
-      
+      console.log(
+        `[WS CLIENT] Envoi de ${this.messageQueue.length} messages en attente`,
+      );
+
       this.messageQueue.forEach(({ event, data }) => {
         if (this.socket) {
+          console.log(`[WS CLIENT] Flushing event: ${event}`, data); // <-- log ajouté
           this.socket.emit(event, data);
         }
       });
-      
+
       this.messageQueue = [];
     }
   }
@@ -319,5 +339,11 @@ export class WebSocketManager {
   }
 }
 
-// Instance singleton pour l'application
-export const wsManager = new WebSocketManager();
+// Détection dynamique de l'URL du backend WebSocket (toujours sur le port 8080)
+const wsPort = 8080;
+const wsHost =
+  typeof window !== "undefined" ? window.location.hostname : "localhost";
+const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+export const wsManager = new WebSocketManager({
+  serverUrl: `${wsProtocol}//${wsHost}:${wsPort}`,
+});

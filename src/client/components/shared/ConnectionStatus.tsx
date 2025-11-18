@@ -1,5 +1,5 @@
-import React from 'react';
-import { useWebSocket } from '../hooks/useWebSocket';
+import React from "react";
+import { useWebSocketContext } from "../../providers/WebSocketProvider";
 
 export interface ConnectionStatusProps {
   className?: string;
@@ -7,41 +7,41 @@ export interface ConnectionStatusProps {
 }
 
 export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
-  className = '',
-  showDetails = false
+  className = "",
+  showDetails = false,
 }) => {
-  const { 
-    connected, 
-    connecting, 
-    error, 
-    connectedUsers, 
+  const {
+    connected,
+    connecting,
+    error,
+    connectedUsers,
     reconnectionAttempt,
-    connect 
-  } = useWebSocket();
+    connect,
+  } = useWebSocketContext();
 
   const getStatusColor = () => {
-    if (connected) return 'text-green-600';
-    if (connecting) return 'text-yellow-600';
-    if (error) return 'text-red-600';
-    return 'text-gray-600';
+    if (connected) return "text-green-600";
+    if (connecting) return "text-yellow-600";
+    if (error) return "text-red-600";
+    return "text-gray-600";
   };
 
   const getStatusIcon = () => {
-    if (connected) return '🟢';
-    if (connecting) return '🟡';
-    if (error) return '🔴';
-    return '⚪';
+    if (connected) return "🟢";
+    if (connecting) return "🟡";
+    if (error) return "🔴";
+    return "⚪";
   };
 
   const getStatusText = () => {
-    if (connected) return 'Connecté';
+    if (connected) return "Connecté";
     if (connecting) {
-      return reconnectionAttempt > 0 
+      return reconnectionAttempt > 0
         ? `Reconnexion... (${reconnectionAttempt})`
-        : 'Connexion...';
+        : "Connexion...";
     }
-    if (error) return 'Erreur de connexion';
-    return 'Déconnecté';
+    if (error) return "Erreur de connexion";
+    return "Déconnecté";
   };
 
   const handleRetry = () => {
@@ -56,15 +56,16 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
       <span className={`font-medium ${getStatusColor()}`}>
         {getStatusText()}
       </span>
-      
+
       {showDetails && (
         <>
           {connected && (
             <span className="text-sm text-gray-500">
-              ({connectedUsers.length} utilisateur{connectedUsers.length !== 1 ? 's' : ''})
+              ({connectedUsers.length} utilisateur
+              {connectedUsers.length !== 1 ? "s" : ""})
             </span>
           )}
-          
+
           {error && !connecting && (
             <button
               onClick={handleRetry}
@@ -75,11 +76,9 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
           )}
         </>
       )}
-      
+
       {error && showDetails && (
-        <div className="text-xs text-red-500 mt-1">
-          {error.message}
-        </div>
+        <div className="text-xs text-red-500 mt-1">{error.message}</div>
       )}
     </div>
   );

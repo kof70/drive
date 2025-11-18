@@ -1,6 +1,6 @@
-import React from 'react';
-import { ViewportState } from './CanvasContainer';
-import { useWebSocketContext } from '../../providers/WebSocketProvider';
+import React from "react";
+import { ViewportState } from "./CanvasContainer";
+import { useWebSocketContext } from "../../providers/WebSocketProvider";
 
 export interface UserCursorsProps {
   viewport: ViewportState;
@@ -8,14 +8,14 @@ export interface UserCursorsProps {
 
 // Couleurs pour les curseurs des utilisateurs
 const CURSOR_COLORS = [
-  '#ef4444', // red
-  '#f97316', // orange
-  '#eab308', // yellow
-  '#22c55e', // green
-  '#06b6d4', // cyan
-  '#3b82f6', // blue
-  '#8b5cf6', // violet
-  '#ec4899', // pink
+  "#ef4444", // red
+  "#f97316", // orange
+  "#eab308", // yellow
+  "#22c55e", // green
+  "#06b6d4", // cyan
+  "#3b82f6", // blue
+  "#8b5cf6", // violet
+  "#ec4899", // pink
 ];
 
 export const UserCursors: React.FC<UserCursorsProps> = ({ viewport }) => {
@@ -23,11 +23,23 @@ export const UserCursors: React.FC<UserCursorsProps> = ({ viewport }) => {
 
   // Filtrer l'utilisateur actuel et ne garder que ceux qui ont une position de curseur
   const otherUsersWithCursors = connectedUsers.filter(
-    user => user.id !== socketId && user.cursor
+    (user) => user.id !== socketId && user.cursor,
   );
 
   if (otherUsersWithCursors.length === 0) {
     return null;
+  }
+
+  // Calculer le centre du conteneur et l'état du viewport
+  let offsetX = 0;
+  let offsetY = 0;
+  if (viewport && typeof window !== "undefined") {
+    const container = document.querySelector(".canvas-container");
+    if (container) {
+      const { width, height } = container.getBoundingClientRect();
+      offsetX = width / 2;
+      offsetY = height / 2;
+    }
   }
 
   return (
@@ -36,12 +48,18 @@ export const UserCursors: React.FC<UserCursorsProps> = ({ viewport }) => {
         if (!user.cursor) return null;
 
         const color = CURSOR_COLORS[index % CURSOR_COLORS.length];
-        
+
+        // Appliquer la transformation inverse pour afficher le curseur à la bonne position
+        const left = offsetX + viewport.x + user.cursor.x * viewport.scale;
+        const top = offsetY + viewport.y + user.cursor.y * viewport.scale;
+
         return (
           <UserCursor
             key={user.id}
             user={user}
             color={color}
+            left={left}
+            top={top}
           />
         );
       })}
@@ -52,18 +70,23 @@ export const UserCursors: React.FC<UserCursorsProps> = ({ viewport }) => {
 interface UserCursorProps {
   user: any; // UserSession avec cursor
   color: string;
+  left: number;
+  top: number;
 }
 
-const UserCursor: React.FC<UserCursorProps> = ({ user, color }) => {
+const UserCursor: React.FC<UserCursorProps> = ({ user, color, left, top }) => {
   if (!user.cursor) return null;
 
   return (
     <div
       className="user-cursor"
       style={{
-        left: user.cursor.x,
-        top: user.cursor.y,
-        color: color
+        position: "absolute",
+        left,
+        top,
+        color: color,
+        pointerEvents: "none",
+        zIndex: 9999,
       }}
     >
       {/* Curseur en forme de flèche */}
@@ -82,7 +105,7 @@ const UserCursor: React.FC<UserCursorProps> = ({ user, color }) => {
             strokeWidth="1"
           />
         </svg>
-        
+
         {/* Nom de l'utilisateur */}
         <div
           className="absolute top-4 left-2 px-2 py-1 text-xs text-white rounded shadow-md whitespace-nowrap"
