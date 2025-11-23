@@ -1,9 +1,10 @@
-import React, { useRef, useState, useCallback, useEffect } from "react";
-import { CanvasViewport } from "./CanvasViewport";
-import { CanvasToolbar } from "./CanvasToolbar";
-import { useCanvasStore } from "../../stores/canvasStore";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDragAndDrop } from "../../hooks/useDragAndDrop";
+import { useCanvasStore } from "../../stores/canvasStore";
 import { Badge } from "../ui/badge";
+import { CanvasBar } from "./CanvasBar";
+import { CanvasViewport } from "./CanvasViewport";
+import { CanvasZoomControls } from "./CanvasZoomControls";
 
 export interface ViewportState {
   x: number;
@@ -158,20 +159,13 @@ export const CanvasContainer: React.FC<CanvasContainerProps> = ({
   }, [resetZoom]);
 
   return (
-    <div className={`flex-1 flex w-full h-full border flex-col ${className}`}>
-      {/* Toolbar avec contrôles de zoom */}
-      <CanvasToolbar
-        viewport={viewport}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
-        onResetZoom={resetZoom}
-        onFitToScreen={fitToScreen}
-      />
-
+    <div
+      className={`flex-1 flex items-center w-full h-full border flex-col ${className}`}
+    >
       {/* Zone canvas principale */}
       <div
         ref={containerRef}
-        className="flex-1 canvas-container relative overflow-hidden"
+        className="flex-1 w-full canvas-container relative overflow-hidden"
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -186,12 +180,22 @@ export const CanvasContainer: React.FC<CanvasContainerProps> = ({
         <CanvasViewport viewport={viewport} containerRef={containerRef} />
       </div>
 
-      {/* Indicateur de zoom */}
+      {/* Barre latérale du canvas */}
+      <CanvasBar onResetZoom={resetZoom} />
+
+      {/* Contrôles de zoom flottants */}
+      <CanvasZoomControls
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        viewport={viewport}
+      />
+
+      {/* Indicateur de position */}
       <Badge
         variant={"outline"}
-        className="zoom-indicator absolute bottom-4 right-4 shadow p-2 w-14 rounded-md "
+        className="position-indicator absolute bg-background bottom-4 left-4 shadow p-2 rounded-full"
       >
-        {Math.round(viewport.scale * 100)}%
+        Position: ({Math.round(viewport.x)}, {Math.round(viewport.y)})
       </Badge>
     </div>
   );

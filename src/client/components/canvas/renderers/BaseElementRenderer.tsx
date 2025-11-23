@@ -45,13 +45,13 @@ export const BaseElementRenderer: React.FC<ElementRendererProps> = ({
 
   return (
     <div
-      className={`canvas-element animate-fade-in ${isSelected ? "selected" : ""} ${isDragging ? "dragging" : ""}`}
+      className={`canvas-element animate-fade-in  ${isDragging ? "dragging" : ""}`}
       style={{
         left: element.position.x,
         top: element.position.y,
-        width: element.size.width,
-        height: element.size.height,
-        backgroundColor: element.style?.backgroundColor || "#ffffff",
+        width: "auto",
+        height: "auto",
+        // backgroundColor: element.style?.backgroundColor || "#ffffff",
         borderColor: element.style?.borderColor || "#e2e8f0",
         fontSize: element.style?.fontSize || 14,
         transform: isDragging ? "rotate(2deg)" : "none",

@@ -4,11 +4,11 @@ import { CanvasGrid } from "./CanvasGrid";
 import { CanvasElements } from "./CanvasElements";
 import { UserCursors } from "./UserCursors";
 import { useWebSocketContext } from "../../providers/WebSocketProvider";
-import { getCanvasCoordinates } from "../../utils/canvasUtils";
+import { getCanvasCoordinates } from "../../utils/canvas-util";
 
 export interface CanvasViewportProps {
   viewport: ViewportState;
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
 }
 
 export const CanvasViewport: React.FC<CanvasViewportProps> = ({

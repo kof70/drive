@@ -5,7 +5,7 @@
 export function getCanvasCoordinates(
   clientX: number,
   clientY: number,
-  containerRef: React.RefObject<HTMLElement>,
+  containerRef: React.RefObject<HTMLElement | null>,
   offsetX: number,
   offsetY: number,
   viewport: { x: number; y: number; scale: number },

@@ -1,5 +1,5 @@
-import React from 'react';
-import { ViewportState } from './CanvasContainer';
+import React from "react";
+import { ViewportState } from "./CanvasContainer";
 
 export interface CanvasGridProps {
   viewport: ViewportState;
@@ -10,34 +10,39 @@ export interface CanvasGridProps {
 export const CanvasGrid: React.FC<CanvasGridProps> = ({
   viewport,
   gridSize = 20,
-  showGrid = true
+  showGrid = true,
 }) => {
   if (!showGrid || viewport.scale < 0.5) {
     return null;
   }
 
-  // Calculer les dimensions de la grille visible
+  // Calculate the visible grid dimensions
   const scaledGridSize = gridSize * viewport.scale;
-  const offsetX = viewport.x % scaledGridSize;
-  const offsetY = viewport.y % scaledGridSize;
+  // Fix: Use Math.floor to avoid negative modulo issues and ensure correct offset
+  const offsetX =
+    (((viewport.x % gridSize) + gridSize) % gridSize) * viewport.scale;
+  const offsetY =
+    (((viewport.y % gridSize) + gridSize) % gridSize) * viewport.scale;
 
-  // Créer le pattern SVG pour la grille
-  const patternId = 'canvas-grid';
-  
+  // Create the SVG pattern for the grid
+  const patternId = "canvas-grid";
+
   return (
     <div className="absolute inset-0 pointer-events-none">
       <svg
-        className="absolute inset-0 w-full h-full"
+        className="absolute"
+        width={5000}
+        height={5000}
         style={{
-          transform: `translate(${-viewport.x}px, ${-viewport.y}px) scale(${1 / viewport.scale})`,
-          transformOrigin: '0 0'
+          left: "-2000px",
+          top: "-2000px",
         }}
       >
         <defs>
           <pattern
             id={patternId}
-            x={offsetX}
-            y={offsetY}
+            x={0}
+            y={0}
             width={scaledGridSize}
             height={scaledGridSize}
             patternUnits="userSpaceOnUse"
@@ -46,16 +51,12 @@ export const CanvasGrid: React.FC<CanvasGridProps> = ({
               cx={scaledGridSize / 2}
               cy={scaledGridSize / 2}
               r={0.5}
-              fill="#e2e8f0"
+              fill="black"
               opacity={Math.min(1, viewport.scale)}
             />
           </pattern>
         </defs>
-        <rect
-          width="100%"
-          height="100%"
-          fill={`url(#${patternId})`}
-        />
+        <rect width="100%" height="100%" fill={`url(#${patternId})`} />
       </svg>
     </div>
   );

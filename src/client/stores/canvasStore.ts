@@ -34,55 +34,55 @@ interface CanvasStore {
 
 // Données de test initiales
 const initialElements: CanvasElement[] = [
-  {
-    id: "element-1",
-    type: "note",
-    position: { x: 0, y: 0 },
-    size: { width: 200, height: 150 },
-    content: "Bienvenue dans votre espace collaboratif !",
-    metadata: {
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      createdBy: "user-1",
-    },
-    style: {
-      backgroundColor: "#fef3c7",
-      borderColor: "#f59e0b",
-    },
-  },
-  {
-    id: "element-2",
-    type: "note",
-    position: { x: 350, y: 200 },
-    size: { width: 180, height: 120 },
-    content:
-      "Vous pouvez créer des notes, glisser des fichiers et collaborer en temps réel.",
-    metadata: {
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      createdBy: "user-1",
-    },
-    style: {
-      backgroundColor: "#dbeafe",
-      borderColor: "#3b82f6",
-    },
-  },
-  {
-    id: "element-3",
-    type: "folder",
-    position: { x: 200, y: 350 },
-    size: { width: 150, height: 100 },
-    content: "Documents partagés",
-    metadata: {
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      createdBy: "user-1",
-    },
-    style: {
-      backgroundColor: "#f3e8ff",
-      borderColor: "#8b5cf6",
-    },
-  },
+  // {
+  //   id: "element-1",
+  //   type: "note",
+  //   position: { x: 0, y: 0 },
+  //   size: { width: 200, height: 150 },
+  //   content: "Bienvenue dans votre espace collaboratif !",
+  //   metadata: {
+  //     createdAt: new Date(),
+  //     updatedAt: new Date(),
+  //     createdBy: "user-1",
+  //   },
+  //   style: {
+  //     backgroundColor: "#fef3c7",
+  //     borderColor: "#f59e0b",
+  //   },
+  // },
+  // {
+  //   id: "element-2",
+  //   type: "note",
+  //   position: { x: 350, y: 200 },
+  //   size: { width: 180, height: 120 },
+  //   content:
+  //     "Vous pouvez créer des notes, glisser des fichiers et collaborer en temps réel.",
+  //   metadata: {
+  //     createdAt: new Date(),
+  //     updatedAt: new Date(),
+  //     createdBy: "user-1",
+  //   },
+  //   style: {
+  //     backgroundColor: "#dbeafe",
+  //     borderColor: "#3b82f6",
+  //   },
+  // },
+  // {
+  //   id: "element-3",
+  //   type: "folder",
+  //   position: { x: 200, y: 350 },
+  //   size: { width: 150, height: 100 },
+  //   content: "Documents partagés",
+  //   metadata: {
+  //     createdAt: new Date(),
+  //     updatedAt: new Date(),
+  //     createdBy: "user-1",
+  //   },
+  //   style: {
+  //     backgroundColor: "#f3e8ff",
+  //     borderColor: "#8b5cf6",
+  //   },
+  // },
 ];
 
 export const useCanvasStore = create<CanvasStore>((set, get) => ({
