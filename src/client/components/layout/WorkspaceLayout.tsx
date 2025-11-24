@@ -9,9 +9,6 @@ export const WorkspaceLayout: React.FC = () => {
       {/* Sidebar avec outils et utilisateurs connectés */}
       {/*<AppSidebar />*/}
       <main className="flex-1 w-full flex flex-col">
-        {/* Header avec statut de connexion et outils */}
-        <Header />
-        {/*<SidebarTrigger />*/}
         {/* Zone canvas principale */}
         <main className="h-[calc(100vh - 60px)] flex-1 w-full">
           <CanvasContainer />

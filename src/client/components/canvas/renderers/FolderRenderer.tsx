@@ -5,6 +5,7 @@ import {
 } from "./BaseElementRenderer";
 
 import { useCanvasStore } from "../../../stores/canvasStore";
+import { formatDate } from "@/client/utils";
 
 export const FolderRenderer: ElementRendererComponent = (props) => {
   const { element, isSelected } = props;
@@ -78,10 +79,10 @@ export const FolderRenderer: ElementRendererComponent = (props) => {
         left: element.position.x,
         top: element.position.y,
         zIndex: isSelected ? 10 : 1,
-        width: element.size?.width || 150,
-        height: element.size?.height || 100,
-        backgroundColor: element.style?.backgroundColor || "#f3e8ff",
-        border: `2px solid ${element.style?.borderColor || "#8b5cf6"}`,
+        // width: element.size?.width || 150,
+        // height: element.size?.height || 100,
+        // backgroundColor: element.style?.backgroundColor || "#f3e8ff",
+        // border: `2px solid ${element.style?.borderColor || "#8b5cf6"}`,
         boxShadow: isSelected
           ? "0 0 0 2px #3b82f6"
           : "0 1px 4px rgba(0,0,0,0.08)",
@@ -100,48 +101,15 @@ export const FolderRenderer: ElementRendererComponent = (props) => {
         if (props.onTouchStart) props.onTouchStart(e);
       }}
     >
-      {/* Header avec icône et nom */}
-      <div className="flex items-center space-x-2 p-2 border-b border-gray-200 bg-opacity-50 bg-gray-50">
-        <button
-          onClick={handleToggleExpand}
-          className="flex items-center space-x-1 hover:bg-gray-200 rounded p-1 transition-colors"
-        >
-          <svg
-            className={`w-3 h-3 text-gray-600 transition-transform ${isExpanded ? "rotate-90" : ""}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-          <svg
-            className="w-4 h-4 text-blue-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-            />
-          </svg>
-        </button>
-        <div className="text-xs font-medium text-gray-700 truncate flex-1">
-          {typeof element.content === "string" ? element.content : "Dossier"}
+      <div className="w-72 border overflow-hidden rounded shadow bg-background">
+        {/* Header avec icône et nom */}
+        <div className="flex items-center space-x-2 p-2 border-b border-gray-200 bg-opacity-50 bg-gray-50">
+          <div className="text-xs font-medium text-gray-700 truncate flex-1">
+            {typeof element.content === "string" ? element.content : "Dossier"}
+          </div>
         </div>
-        <div className="text-xs text-gray-500">{mockFiles.length}</div>
-      </div>
-
-      {/* Contenu du dossier */}
-      <div className="flex-1 overflow-hidden">
-        {isExpanded ? (
+        {/* Contenu du dossier */}
+        <div className="flex-1 ">
           <div className="p-2 space-y-1 max-h-32 overflow-y-auto">
             {mockFiles.map((file, index) => (
               <div
@@ -156,40 +124,15 @@ export const FolderRenderer: ElementRendererComponent = (props) => {
               </div>
             ))}
           </div>
-        ) : (
-          <div className="p-3 flex items-center justify-center text-gray-500">
-            <div className="text-center">
-              <svg
-                className="w-8 h-8 mx-auto mb-2 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1}
-                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                />
-              </svg>
-              <div className="text-xs text-gray-500">Cliquez pour ouvrir</div>
-            </div>
+        </div>
+        {/* Footer */}
+        <div className="px-3 py-1 border-t border-gray-200 bg-gray-50 bg-opacity-50">
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <span>{formatDate(element.metadata?.updatedAt || new Date())}</span>
+            <span>
+              {mockFiles.length} élément{mockFiles.length !== 1 ? "s" : ""}
+            </span>
           </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="px-3 py-1 border-t border-gray-200 bg-gray-50 bg-opacity-50">
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>
-            {new Date(element.metadata.updatedAt).toLocaleDateString("fr-FR", {
-              day: "2-digit",
-              month: "2-digit",
-            })}
-          </span>
-          <span>
-            {mockFiles.length} élément{mockFiles.length !== 1 ? "s" : ""}
-          </span>
         </div>
       </div>
     </BaseElementRenderer>

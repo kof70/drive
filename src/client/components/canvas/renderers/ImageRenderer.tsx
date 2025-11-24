@@ -16,6 +16,7 @@ export const ImageRenderer: ElementRendererComponent = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const { updateElement } = useCanvasStore();
 
+  console.log({ element });
   // Pour la démo, on utilise une image placeholder
   const imageUrl = `https://picsum.photos/200/150?random=${element.id}`;
 

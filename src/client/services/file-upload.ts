@@ -1,7 +1,7 @@
-import { FileReference, ApiResponse } from '../../shared/types';
-import { logger } from '../utils/logger';
+import { FileReference, ApiResponse } from "../../shared/types";
+import { logger } from "../utils/logger";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_URL = "http://localhost:8080";
 
 export class FileUploadService {
   /**
@@ -10,11 +10,11 @@ export class FileUploadService {
   async uploadFile(
     file: File,
     uploadedBy: string,
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number) => void,
   ): Promise<FileReference> {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('uploadedBy', uploadedBy);
+    formData.append("file", file);
+    formData.append("uploadedBy", uploadedBy);
 
     try {
       const xhr = new XMLHttpRequest();
@@ -23,7 +23,7 @@ export class FileUploadService {
       const uploadPromise = new Promise<FileReference>((resolve, reject) => {
         // Gérer la progression
         if (onProgress) {
-          xhr.upload.addEventListener('progress', (event) => {
+          xhr.upload.addEventListener("progress", (event) => {
             if (event.lengthComputable) {
               const progress = (event.loaded / event.total) * 100;
               onProgress(progress);
@@ -32,17 +32,19 @@ export class FileUploadService {
         }
 
         // Gérer la réponse
-        xhr.addEventListener('load', () => {
+        xhr.addEventListener("load", () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
-              const response: ApiResponse<FileReference> = JSON.parse(xhr.responseText);
+              const response: ApiResponse<FileReference> = JSON.parse(
+                xhr.responseText,
+              );
               if (response.success && response.data) {
                 resolve(response.data);
               } else {
-                reject(new Error(response.error?.message || 'Upload failed'));
+                reject(new Error(response.error?.message || "Upload failed"));
               }
             } catch (error) {
-              reject(new Error('Invalid response format'));
+              reject(new Error("Invalid response format"));
             }
           } else {
             reject(new Error(`Upload failed with status ${xhr.status}`));
@@ -50,16 +52,16 @@ export class FileUploadService {
         });
 
         // Gérer les erreurs
-        xhr.addEventListener('error', () => {
-          reject(new Error('Network error during upload'));
+        xhr.addEventListener("error", () => {
+          reject(new Error("Network error during upload"));
         });
 
-        xhr.addEventListener('abort', () => {
-          reject(new Error('Upload aborted'));
+        xhr.addEventListener("abort", () => {
+          reject(new Error("Upload aborted"));
         });
 
         // Envoyer la requête
-        xhr.open('POST', `${API_BASE_URL}/api/files/upload`);
+        xhr.open("POST", `${API_BASE_URL}/api/files/upload`);
         xhr.send(formData);
       });
 
@@ -67,7 +69,7 @@ export class FileUploadService {
       logger.info(`✅ Fichier uploadé: ${file.name}`);
       return fileReference;
     } catch (error) {
-      logger.error('❌ Erreur lors de l\'upload:', error as Error);
+      logger.error("❌ Erreur lors de l'upload:", error as Error);
       throw error;
     }
   }
@@ -75,19 +77,24 @@ export class FileUploadService {
   /**
    * Télécharge un fichier depuis le serveur
    */
-  async downloadFile(storedFilename: string, originalFilename: string): Promise<void> {
+  async downloadFile(
+    storedFilename: string,
+    originalFilename: string,
+  ): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/files/download/${storedFilename}`);
-      
+      const response = await fetch(
+        `${API_BASE_URL}/api/files/download/${storedFilename}`,
+      );
+
       if (!response.ok) {
         throw new Error(`Download failed with status ${response.status}`);
       }
 
       const blob = await response.blob();
-      
+
       // Créer un lien de téléchargement temporaire
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = originalFilename;
       document.body.appendChild(link);
@@ -97,7 +104,7 @@ export class FileUploadService {
 
       logger.info(`✅ Fichier téléchargé: ${originalFilename}`);
     } catch (error) {
-      logger.error('❌ Erreur lors du téléchargement:', error as Error);
+      logger.error("❌ Erreur lors du téléchargement:", error as Error);
       throw error;
     }
   }
@@ -107,20 +114,23 @@ export class FileUploadService {
    */
   async deleteFile(storedFilename: string): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/files/${storedFilename}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/files/${storedFilename}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       const result: ApiResponse = await response.json();
-      
+
       if (result.success) {
         logger.info(`✅ Fichier supprimé: ${storedFilename}`);
         return true;
       } else {
-        throw new Error(result.error?.message || 'Delete failed');
+        throw new Error(result.error?.message || "Delete failed");
       }
     } catch (error) {
-      logger.error('❌ Erreur lors de la suppression:', error as Error);
+      logger.error("❌ Erreur lors de la suppression:", error as Error);
       throw error;
     }
   }
@@ -132,14 +142,14 @@ export class FileUploadService {
     try {
       const response = await fetch(`${API_BASE_URL}/api/files/list`);
       const result: ApiResponse = await response.json();
-      
+
       if (result.success && result.data) {
         return result.data;
       } else {
-        throw new Error(result.error?.message || 'Failed to list files');
+        throw new Error(result.error?.message || "Failed to list files");
       }
     } catch (error) {
-      logger.error('❌ Erreur lors du listage des fichiers:', error as Error);
+      logger.error("❌ Erreur lors du listage des fichiers:", error as Error);
       throw error;
     }
   }
@@ -151,14 +161,17 @@ export class FileUploadService {
     try {
       const response = await fetch(`${API_BASE_URL}/api/files/stats`);
       const result: ApiResponse = await response.json();
-      
+
       if (result.success && result.data) {
         return result.data;
       } else {
-        throw new Error(result.error?.message || 'Failed to get stats');
+        throw new Error(result.error?.message || "Failed to get stats");
       }
     } catch (error) {
-      logger.error('❌ Erreur lors de la récupération des stats:', error as Error);
+      logger.error(
+        "❌ Erreur lors de la récupération des stats:",
+        error as Error,
+      );
       throw error;
     }
   }

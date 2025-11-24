@@ -262,7 +262,9 @@ export const NoteRenderer: ElementRendererComponent = (props) => {
             </div>
           )}
 
-          <span>{formatDate(element.metadata.updatedAt)}</span>
+          <span className="text-xs">
+            {formatDate(element.metadata.updatedAt)}
+          </span>
         </CardFooter>
       </Card>
     </BaseElementRenderer>

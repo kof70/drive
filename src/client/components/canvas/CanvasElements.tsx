@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ViewportState } from "./CanvasContainer";
 import { CanvasElement } from "../../../shared/types";
 import { useCanvasStore } from "../../stores/canvasStore";
@@ -8,6 +8,7 @@ import { ElementRendererFactory } from "./renderers/ElementRendererFactory";
 
 export interface CanvasElementsProps {
   viewport: ViewportState;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export const CanvasElements: React.FC<CanvasElementsProps> = ({ viewport }) => {

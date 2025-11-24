@@ -68,7 +68,7 @@ export const CanvasViewport: React.FC<CanvasViewportProps> = ({
       <CanvasGrid viewport={viewport} />
 
       {/* Éléments du canvas */}
-      <CanvasElements viewport={viewport} />
+      <CanvasElements containerRef={containerRef} viewport={viewport} />
 
       {/* Curseurs des autres utilisateurs */}
       <UserCursors viewport={viewport} />

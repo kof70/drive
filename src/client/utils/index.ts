@@ -9,6 +9,7 @@ export function formatDate(date: Date): string {
   return new Date(date).toLocaleString("fr-FR", {
     day: "2-digit",
     month: "2-digit",
+    year: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
   });

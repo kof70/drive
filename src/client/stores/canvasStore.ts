@@ -6,6 +6,8 @@ interface CanvasStore {
   elements: CanvasElement[];
   selectedElementIds: string[];
   isInitialized: boolean;
+  history: CanvasElement[][];
+  future: CanvasElement[][];
 
   // Actions
   addElement: (element: CanvasElement, broadcast?: boolean) => void;
@@ -22,6 +24,11 @@ interface CanvasStore {
     position: { x: number; y: number },
     broadcast?: boolean,
   ) => void;
+  pushHistory: () => void;
+
+  // Undo/Redo
+  undo: () => void;
+  redo: () => void;
 
   // Synchronisation
   syncCanvasState: (elements: CanvasElement[]) => void;
@@ -89,8 +96,19 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   elements: initialElements,
   selectedElementIds: [],
   isInitialized: false,
+  history: [],
+  future: [],
+
+  // Helper to push to history
+  pushHistory: () => {
+    set((state) => ({
+      history: [...state.history, state.elements],
+      future: [],
+    }));
+  },
 
   addElement: (element, broadcast = true) => {
+    get().pushHistory();
     // Positionne le nouvel élément au centre du canvas (x:0, y:0)
     const centeredElement = {
       ...element,
@@ -107,6 +125,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   updateElement: (id, updates, broadcast = true) => {
+    get().pushHistory();
     let updatedElement: CanvasElement | undefined;
 
     set((state) => {
@@ -136,6 +155,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   removeElement: (id, broadcast = true) => {
+    get().pushHistory();
     set((state) => ({
       elements: state.elements.filter((element) => element.id !== id),
       selectedElementIds: state.selectedElementIds.filter(
@@ -171,9 +191,40 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   moveElement: (id, position, broadcast = true) => {
+    get().pushHistory();
     console.log("moveElement called", id, position); // diagnostic log
     const { updateElement } = get();
     updateElement(id, { position }, broadcast);
+  },
+
+  undo: () => {
+    const { history, elements, future } = get();
+    if (history.length === 0) return;
+    const previous = history[history.length - 1];
+    set({
+      elements: previous,
+      history: history.slice(0, -1),
+      future: [elements, ...future],
+    });
+    // Synchronisation WebSocket
+    if (wsManager.connected) {
+      wsManager.send("canvas-sync", previous);
+    }
+  },
+
+  redo: () => {
+    const { future, elements, history } = get();
+    if (future.length === 0) return;
+    const next = future[0];
+    set({
+      elements: next,
+      history: [...history, elements],
+      future: future.slice(1),
+    });
+    // Synchronisation WebSocket
+    if (wsManager.connected) {
+      wsManager.send("canvas-sync", next);
+    }
   },
 
   syncCanvasState: (elements) => {

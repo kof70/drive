@@ -5,6 +5,7 @@ import { Badge } from "../ui/badge";
 import { CanvasBar } from "./CanvasBar";
 import { CanvasViewport } from "./CanvasViewport";
 import { CanvasZoomControls } from "./CanvasZoomControls";
+import CanvasUserConnected from "./CanvasUserConnected";
 
 export interface ViewportState {
   x: number;
@@ -28,7 +29,7 @@ export const CanvasContainer: React.FC<CanvasContainerProps> = ({
   const [isPanning, setIsPanning] = useState(false);
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
 
-  const { clearSelection } = useCanvasStore();
+  const { clearSelection, undo, redo } = useCanvasStore();
 
   // Le hook useDragAndDrop gère maintenant l'upload automatiquement
   const { handleFileDrop, handleDragOver } = useDragAndDrop();
@@ -128,6 +129,22 @@ export const CanvasContainer: React.FC<CanvasContainerProps> = ({
           scale: Math.max(0.1, prev.scale * 0.8),
         }));
       }
+
+      // Ctrl/Cmd + Z : Undo
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        undo();
+      }
+
+      // Ctrl/Cmd + Y or Ctrl/Cmd + Shift + Z : Redo
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key.toLowerCase() === "y" ||
+          (event.shiftKey && event.key.toLowerCase() === "z"))
+      ) {
+        event.preventDefault();
+        redo();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -189,6 +206,9 @@ export const CanvasContainer: React.FC<CanvasContainerProps> = ({
         onZoomOut={zoomOut}
         viewport={viewport}
       />
+
+      {/* Utilisateurs connectés */}
+      <CanvasUserConnected />
 
       {/* Indicateur de position */}
       <Badge

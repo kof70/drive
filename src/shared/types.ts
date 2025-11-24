@@ -10,7 +10,7 @@ export interface ServerConfig {
 
 export interface CanvasElement {
   id: string;
-  type: 'file' | 'note' | 'folder' | 'image';
+  type: "file" | "note" | "folder" | "image";
   position: { x: number; y: number };
   size: { width: number; height: number };
   content: string | FileReference;
@@ -38,7 +38,7 @@ export interface FileReference {
 export interface ClipboardData {
   id: string;
   content: string;
-  type: 'text' | 'html' | 'image';
+  type: "text" | "html" | "image";
   timestamp: Date;
   deviceId: string;
 }
@@ -59,12 +59,12 @@ export interface CursorPosition {
 }
 
 export interface WebSocketEvents {
-  'canvas-update': (data: CanvasElement) => void;
-  'clipboard-sync': (content: ClipboardData) => void;
-  'file-upload': (file: FileMetadata) => void;
-  'user-cursor': (position: CursorPosition) => void;
-  'user-connected': (session: UserSession) => void;
-  'user-disconnected': (sessionId: string) => void;
+  "canvas-update": (data: CanvasElement) => void;
+  "clipboard-sync": (content: ClipboardData) => void;
+  "file-upload": (file: FileMetadata) => void;
+  "user-cursor": (position: CursorPosition) => void;
+  "user-connected": (session: UserSession) => void;
+  "user-disconnected": (sessionId: string) => void;
 }
 
 export interface FileMetadata {
@@ -77,11 +77,11 @@ export interface FileMetadata {
 }
 
 export enum ErrorCodes {
-  NETWORK_DISCONNECTED = 'NET_001',
-  FILE_TOO_LARGE = 'FILE_001',
-  STORAGE_FULL = 'STORAGE_001',
-  SYNC_CONFLICT = 'SYNC_001',
-  PERMISSION_DENIED = 'AUTH_001'
+  NETWORK_DISCONNECTED = "NET_001",
+  FILE_TOO_LARGE = "FILE_001",
+  STORAGE_FULL = "STORAGE_001",
+  SYNC_CONFLICT = "SYNC_001",
+  PERMISSION_DENIED = "AUTH_001",
 }
 
 export interface ApiResponse<T = any> {

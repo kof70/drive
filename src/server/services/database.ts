@@ -1,16 +1,16 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import fs from 'fs';
-import { CanvasElement } from '../../shared/types';
-import { logger } from '../utils/logger';
+import Database from "better-sqlite3";
+import path from "path";
+import fs from "fs";
+import { CanvasElement } from "../../shared/types";
+import { logger } from "../utils/logger";
 
 export class DatabaseService {
   private db: Database.Database;
   private dbPath: string;
 
-  constructor(dbPath: string = './data/workspace.db') {
+  constructor(dbPath: string = "./data/workspace.db") {
     this.dbPath = dbPath;
-    
+
     // Créer le dossier data s'il n'existe pas
     const dataDir = path.dirname(dbPath);
     if (!fs.existsSync(dataDir)) {
@@ -20,10 +20,10 @@ export class DatabaseService {
 
     // Initialiser la base de données
     this.db = new Database(dbPath);
-    this.db.pragma('journal_mode = WAL'); // Write-Ahead Logging pour de meilleures performances
-    
+    this.db.pragma("journal_mode = WAL"); // Write-Ahead Logging pour de meilleures performances
+
     logger.info(`💾 Base de données initialisée: ${dbPath}`);
-    
+
     // Créer les tables
     this.initializeTables();
   }
@@ -51,16 +51,16 @@ export class DatabaseService {
 
     // Index pour améliorer les performances
     this.db.exec(`
-      CREATE INDEX IF NOT EXISTS idx_canvas_elements_type 
+      CREATE INDEX IF NOT EXISTS idx_canvas_elements_type
       ON canvas_elements(type)
     `);
 
     this.db.exec(`
-      CREATE INDEX IF NOT EXISTS idx_canvas_elements_updated 
+      CREATE INDEX IF NOT EXISTS idx_canvas_elements_updated
       ON canvas_elements(updated_at)
     `);
 
-    logger.info('✅ Tables de base de données créées/vérifiées');
+    logger.info("✅ Tables de base de données créées/vérifiées");
   }
 
   /**
@@ -68,13 +68,15 @@ export class DatabaseService {
    */
   public saveElement(element: CanvasElement): void {
     const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO canvas_elements 
+      INSERT OR REPLACE INTO canvas_elements
       (id, type, position_x, position_y, size_width, size_height, content, metadata, style, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const now = Date.now();
-    const createdAt = element.metadata.createdAt ? new Date(element.metadata.createdAt).getTime() : now;
+    const createdAt = element.metadata.createdAt
+      ? new Date(element.metadata.createdAt).getTime()
+      : now;
 
     stmt.run(
       element.id,
@@ -83,11 +85,13 @@ export class DatabaseService {
       element.position.y,
       element.size.width,
       element.size.height,
-      element.content || null,
+      typeof element.content === "object"
+        ? JSON.stringify(element.content)
+        : element.content,
       JSON.stringify(element.metadata),
       element.style ? JSON.stringify(element.style) : null,
       createdAt,
-      now
+      now,
     );
   }
 
@@ -128,7 +132,7 @@ export class DatabaseService {
     `);
 
     const rows = stmt.all() as any[];
-    return rows.map(row => this.rowToElement(row));
+    return rows.map((row) => this.rowToElement(row));
   }
 
   /**
@@ -146,8 +150,8 @@ export class DatabaseService {
    * Supprime tous les éléments
    */
   public clearAllElements(): void {
-    this.db.exec('DELETE FROM canvas_elements');
-    logger.info('🗑️  Tous les éléments supprimés');
+    this.db.exec("DELETE FROM canvas_elements");
+    logger.info("🗑️  Tous les éléments supprimés");
   }
 
   /**
@@ -171,15 +175,15 @@ export class DatabaseService {
       type: row.type,
       position: {
         x: row.position_x,
-        y: row.position_y
+        y: row.position_y,
       },
       size: {
         width: row.size_width,
-        height: row.size_height
+        height: row.size_height,
       },
       content: row.content,
       metadata: JSON.parse(row.metadata),
-      style: row.style ? JSON.parse(row.style) : undefined
+      style: row.style ? JSON.parse(row.style) : undefined,
     };
   }
 
@@ -187,7 +191,7 @@ export class DatabaseService {
    * Crée une sauvegarde de la base de données
    */
   public backup(backupPath?: string): string {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const defaultBackupPath = `./data/backups/workspace-${timestamp}.db`;
     const finalBackupPath = backupPath || defaultBackupPath;
 
@@ -199,7 +203,7 @@ export class DatabaseService {
 
     // Copier la base de données
     this.db.backup(finalBackupPath);
-    
+
     logger.info(`💾 Backup créé: ${finalBackupPath}`);
     return finalBackupPath;
   }
@@ -209,7 +213,7 @@ export class DatabaseService {
    */
   public close(): void {
     this.db.close();
-    logger.info('💾 Base de données fermée');
+    logger.info("💾 Base de données fermée");
   }
 
   /**
@@ -221,11 +225,11 @@ export class DatabaseService {
     dbPath: string;
   } {
     const stats = fs.statSync(this.dbPath);
-    
+
     return {
       elementCount: this.countElements(),
       dbSize: stats.size,
-      dbPath: this.dbPath
+      dbPath: this.dbPath,
     };
   }
 }
