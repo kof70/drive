@@ -11,15 +11,29 @@ import { Dialog, DialogContent, DialogTrigger } from "../../ui/dialog";
 
 export const FileRenderer: ElementRendererComponent = (props) => {
   const { element, isSelected } = props;
-  console.log("Element content type:", typeof element.content);
-  const fileRef: FileReference =
-    typeof element.content === "string"
-      ? (JSON.parse(element.content.toString()) as FileReference)
-      : (element.content as FileReference);
   const [isDownloading, setIsDownloading] = useState(false);
-  console.log("is String:", typeof element.content === "string");
-  console.log({ element });
-  console.log({ fileRef });
+
+  // Parse fileRef safely
+  let fileRef: FileReference;
+  try {
+    fileRef =
+      typeof element.content === "string"
+        ? (JSON.parse(element.content) as FileReference)
+        : (element.content as FileReference);
+  } catch {
+    // Fallback for invalid content
+    fileRef = {
+      filename: "Fichier inconnu",
+      originalPath: "",
+      storedPath: "",
+      mimeType: "application/octet-stream",
+      size: 0,
+      checksum: "",
+    };
+  }
+
+  // Ensure mimeType is defined
+  const mimeType = fileRef?.mimeType || "application/octet-stream";
   // const { updateElement } = useCanvasStore();
 
   const formatFileSize = (bytes: number): string => {
@@ -31,7 +45,7 @@ export const FileRenderer: ElementRendererComponent = (props) => {
   };
 
   const renderFilePreview = () => {
-    if (fileRef.mimeType.startsWith("image/")) {
+    if (mimeType.startsWith("image/")) {
       const apiUrl = "http://localhost:8080";
       const imageUrl = `${apiUrl}/api/files/download/${fileRef.storedPath}`;
       return (
@@ -42,35 +56,35 @@ export const FileRenderer: ElementRendererComponent = (props) => {
         />
       );
     }
-    if (fileRef.mimeType.includes("pdf")) {
+    if (mimeType.includes("pdf")) {
       return (
         <div className="w-full h-36 flex items-center justify-center bg-red-100">
           <span className="text-red-600 text-2xl font-bold">PDF</span>
         </div>
       );
     }
-    if (fileRef.mimeType.startsWith("text/")) {
+    if (mimeType.startsWith("text/")) {
       return (
         <div className="w-full h-36 flex items-center justify-center bg-blue-100">
           <span className="text-blue-600 text-2xl font-bold">TXT</span>
         </div>
       );
     }
-    if (fileRef.mimeType.startsWith("video/")) {
+    if (mimeType.startsWith("video/")) {
       return (
         <div className="w-full h-36 flex items-center justify-center bg-purple-100">
           <span className="text-purple-600 text-2xl font-bold">VID</span>
         </div>
       );
     }
-    if (fileRef.mimeType.startsWith("audio/")) {
+    if (mimeType.startsWith("audio/")) {
       return (
         <div className="w-full h-36 flex items-center justify-center bg-yellow-100">
           <span className="text-yellow-600 font-bold">AUD</span>
         </div>
       );
     }
-    if (fileRef.mimeType === "application/zip") {
+    if (mimeType === "application/zip") {
       return (
         <div className="w-full h-36 flex items-center justify-center bg-amber-100">
           <span className="text-amber-600 text-2xl font-bold">ZIP</span>
@@ -78,8 +92,8 @@ export const FileRenderer: ElementRendererComponent = (props) => {
       );
     }
     if (
-      fileRef.mimeType === "application/msword" ||
-      fileRef.mimeType ===
+      mimeType === "application/msword" ||
+      mimeType ===
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
       return (
@@ -208,7 +222,7 @@ export const FileRenderer: ElementRendererComponent = (props) => {
     event.stopPropagation();
 
     // Pour les images, ouvrir dans un nouvel onglet
-    if (fileRef.mimeType.startsWith("image/")) {
+    if (mimeType.startsWith("image/")) {
       const apiUrl = "http://localhost:8080";
       window.open(
         `${apiUrl}/api/files/download/${fileRef.storedPath}`,
@@ -260,7 +274,7 @@ export const FileRenderer: ElementRendererComponent = (props) => {
           <Dialog>
             <DialogTrigger asChild>
               <button
-                hidden={!fileRef.mimeType.startsWith("image/")}
+                hidden={!mimeType.startsWith("image/")}
                 className="p-1 hover:bg-gray-200 rounded transition-colors"
                 title="Prévisualiser"
               >
