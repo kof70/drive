@@ -11,12 +11,27 @@ import { ElementRendererComponent } from "./BaseElementRenderer";
 
 export const ImageRenderer: ElementRendererComponent = (props) => {
   const { element, isSelected } = props;
-  const fileRef = element.content as FileReference;
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { updateElement } = useCanvasStore();
 
-  console.log({ element });
+  // Parse fileRef safely
+  let fileRef: FileReference;
+  try {
+    fileRef =
+      typeof element.content === "string"
+        ? (JSON.parse(element.content) as FileReference)
+        : (element.content as FileReference);
+  } catch {
+    fileRef = {
+      filename: "Image inconnue",
+      originalPath: "",
+      storedPath: "",
+      mimeType: "image/unknown",
+      size: 0,
+      checksum: "",
+    };
+  }
   // Pour la démo, on utilise une image placeholder
   const imageUrl = `https://picsum.photos/200/150?random=${element.id}`;
 

@@ -1,0 +1,85 @@
+{
+  "name": "local-collaborative-workspace",
+  "displayName": "Local Collaborative Workspace",
+  "description": "Real-time collaborative canvas for local networks - share files, notes, and organize content visually without internet connectivity",
+  "version": "1.0.0",
+  "publisher": "local-collaborative-workspace",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "collaborative",
+    "workspace",
+    "local",
+    "real-time",
+    "canvas",
+    "file-sharing"
+  ],
+  "activationEvents": [],
+  "main": "./extension/extension.js",
+  "browser": "./extension/extension.js",
+  "icon": "icon.png",
+  "contributes": {
+    "commands": [
+      {
+        "command": "localWorkspace.startServer",
+        "title": "Local Workspace: Start Server",
+        "icon": "$(play)"
+      },
+      {
+        "command": "localWorkspace.stopServer",
+        "title": "Local Workspace: Stop Server",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "localWorkspace.restartServer",
+        "title": "Local Workspace: Restart Server",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "localWorkspace.openCanvas",
+        "title": "Local Workspace: Open Canvas",
+        "icon": "$(window)"
+      },
+      {
+        "command": "localWorkspace.copyUrl",
+        "title": "Local Workspace: Copy URL",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "localWorkspace.showQRCode",
+        "title": "Local Workspace: Show QR Code",
+        "icon": "$(device-mobile)"
+      }
+    ],
+    "configuration": {
+      "title": "Local Collaborative Workspace",
+      "properties": {
+        "localWorkspace.port": {
+          "type": "number",
+          "default": 8080,
+          "description": "Server port for the collaborative workspace"
+        },
+        "localWorkspace.autoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically start the server when VS Code launches"
+        },
+        "localWorkspace.storagePath": {
+          "type": "string",
+          "default": "",
+          "description": "Storage directory path for workspace data (empty = workspace folder)"
+        }
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/local-collaborative-workspace/local-collaborative-workspace"
+  },
+  "license": "MIT"
+}

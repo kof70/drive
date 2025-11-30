@@ -1,0 +1,57 @@
+# VS Code Extension Ignore File
+# This file specifies which files to exclude from the .vsix package
+# Note: vsce packages from the dist folder, so paths are relative to dist/
+
+# Source files (not in dist anyway, but just in case)
+src/**
+scripts/**
+docs/**
+postman/**
+
+# Development configuration
+.kiro/**
+.vscode/**
+.git/**
+.gitignore
+.eslintrc.js
+.npmrc
+
+# TypeScript and build config
+tsconfig*.json
+vite.config.ts
+jest.config.js
+esbuild.extension.js
+components.json
+
+# Documentation (except README)
+*.md
+!README.md
+
+# Test files
+**/__tests__/**
+**/__mocks__/**
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Development data
+data/**
+workspace-data/**
+
+# Package manager files
+node_modules/**
+pnpm-lock.yaml
+package-lock.json
+
+# Build artifacts we don't need
+*.vsix
+*.map
+
+# Misc
+*.log
+.DS_Store
+Thumbs.db
+
+# Root package.json (we use package.extension.json copied as package.json)
+package.extension.json
