@@ -8,6 +8,7 @@ import { NoteRenderer } from "./NoteRenderer";
 import { FolderRenderer } from "./FolderRenderer";
 import { FileRenderer } from "./FileRenderer";
 import { ImageRenderer } from "./ImageRenderer";
+import { RepereRenderer } from "../RepereRenderer";
 
 // Registry des renderers par type d'élément
 const rendererRegistry: Record<
@@ -18,6 +19,7 @@ const rendererRegistry: Record<
   folder: FolderRenderer,
   file: FileRenderer,
   image: ImageRenderer,
+  rectangleGroup: RepereRenderer,
 };
 
 export interface ElementRendererFactoryProps extends ElementRendererProps {

@@ -1,4 +1,4 @@
-// Couleurs prédéfinies pour les notes
+// Couleurs prédéfinies pour les notes (classes Tailwind)
 export const noteColors = [
   { name: "Blanc", bg: "bg-white", border: "border-gray-200" },
   { name: "Jaune", bg: "bg-yellow-100", border: "border-yellow-400" },
@@ -8,6 +8,18 @@ export const noteColors = [
   { name: "Violet", bg: "bg-purple-100", border: "border-purple-400" },
   { name: "Orange", bg: "bg-orange-100", border: "border-orange-400" },
   { name: "Gris", bg: "bg-gray-100", border: "border-gray-400" },
+];
+
+// Couleurs CSS brutes pour les repères
+export const repereColors = [
+  { name: "Blanc", value: "#fff", border: "#e5e7eb" },
+  { name: "Jaune", value: "#fef9c3", border: "#fde047" },
+  { name: "Vert", value: "#dcfce7", border: "#22c55e" },
+  { name: "Bleu", value: "#dbeafe", border: "#3b82f6" },
+  { name: "Rose", value: "#fbcfe8", border: "#ec4899" },
+  { name: "Violet", value: "#ede9fe", border: "#8b5cf6" },
+  { name: "Orange", value: "#ffedd5", border: "#f97316" },
+  { name: "Gris", value: "#f3f4f6", border: "#6b7280" },
 ];
 
 // Tailles de police prédéfinies

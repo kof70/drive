@@ -31,11 +31,11 @@ export const CanvasGrid: React.FC<CanvasGridProps> = ({
     <div className="absolute inset-0 pointer-events-none">
       <svg
         className="absolute"
-        width={5000}
-        height={5000}
+        width={50000000}
+        height={50000000}
         style={{
-          left: "-2000px",
-          top: "-2000px",
+          left: "-20000px",
+          top: "-20000px",
         }}
       >
         <defs>

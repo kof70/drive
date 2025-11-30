@@ -118,6 +118,78 @@ export const CanvasBar: React.FC<CanvasBarProps> = ({ onResetZoom }) => {
   return (
     <div className="absolute bottom-4 bg-background rounded-full shadow-xl h-14 flex items-center gap-2  border p-3 ">
       <Button
+        title="Créer un repère (rectangle/carré)"
+        onClick={() => {
+          const now = new Date();
+          const name = "Nouveau repère";
+          const { elements } = useCanvasStore.getState();
+          const repereList = elements.filter(
+            (el) =>
+              el.type === "rectangleGroup" &&
+              typeof el.content === "object" &&
+              el.content !== null &&
+              "name" in el.content,
+          );
+          if (repereList.some((r) => (r.content as any).name === name)) {
+            addNotification({
+              type: "error",
+              title: "Nom déjà utilisé",
+              message: "Un repère avec ce nom existe déjà.",
+              duration: 4000,
+            });
+            return;
+          }
+          const newRepere: CanvasElement = {
+            id: `rectangleGroup-${Date.now()}`,
+            type: "rectangleGroup",
+            position: {
+              x: 120 + Math.random() * 180,
+              y: 120 + Math.random() * 180,
+            },
+            size: { width: 300, height: 200 },
+            content: {
+              name,
+              createdAt: now,
+              elements: [],
+            },
+            metadata: {
+              createdAt: now,
+              updatedAt: now,
+              createdBy: "current-user",
+            },
+            style: {
+              backgroundColor: "rgba(0,120,255,0.12)",
+              borderColor: "#0078ff",
+            },
+          };
+          addElement(newRepere);
+          emit("canvas-update", newRepere);
+          addNotification({
+            type: "success",
+            title: "Repère créé",
+            message: "Nouveau repère ajouté au canvas",
+            duration: 3000,
+          });
+        }}
+        size={"icon-lg"}
+        variant={"outline"}
+        className="rounded-full"
+      >
+        {/* Icône simple pour le rectangle */}
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <rect
+            x="4"
+            y="6"
+            width="16"
+            height="12"
+            stroke="#0078ff"
+            strokeWidth="2"
+            rx="3"
+            fill="rgba(0,120,255,0.12)"
+          />
+        </svg>
+      </Button>
+      <Button
         title="Ajouter une note"
         onClick={() => createNewElement("note")}
         size={"icon-lg"}
@@ -126,7 +198,7 @@ export const CanvasBar: React.FC<CanvasBarProps> = ({ onResetZoom }) => {
       >
         <RiStickyNoteAddLine />
       </Button>
-      <Button
+      {/*<Button
         title="Ajouter un dossier"
         onClick={() => createNewElement("folder")}
         size={"icon-lg"}
@@ -134,7 +206,7 @@ export const CanvasBar: React.FC<CanvasBarProps> = ({ onResetZoom }) => {
         className="rounded-full"
       >
         <RiFolderAddLine />
-      </Button>
+      </Button>*/}
 
       <label htmlFor="upload">
         <input

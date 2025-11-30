@@ -8,12 +8,26 @@ export interface ServerConfig {
   enableMDNS: boolean;
 }
 
+export type CanvasElementType =
+  | "file"
+  | "note"
+  | "folder"
+  | "image"
+  | "rectangleGroup";
+
 export interface CanvasElement {
   id: string;
-  type: "file" | "note" | "folder" | "image";
+  type: CanvasElementType;
   position: { x: number; y: number };
   size: { width: number; height: number };
-  content: string | FileReference;
+  content:
+    | string
+    | FileReference
+    | {
+        name?: string;
+        createdAt?: Date;
+        elements?: string[];
+      };
   metadata: {
     createdAt: Date;
     updatedAt: Date;

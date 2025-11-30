@@ -6,6 +6,7 @@ import { CanvasBar } from "./CanvasBar";
 import { CanvasViewport } from "./CanvasViewport";
 import { CanvasZoomControls } from "./CanvasZoomControls";
 import CanvasUserConnected from "./CanvasUserConnected";
+import { RepereSearchBar } from "./search/RepereSearchBar";
 
 export interface ViewportState {
   x: number;
@@ -175,10 +176,28 @@ export const CanvasContainer: React.FC<CanvasContainerProps> = ({
     resetZoom();
   }, [resetZoom]);
 
+  const { elements } = useCanvasStore();
+
+  // Fonction pour centrer la vue sur un repère
+  const focusRepere = (repereId: string) => {
+    const repere = elements.find((el) => el.id === repereId);
+    if (!repere) return;
+    const centerX = repere.position.x + repere.size.width / 2;
+    const centerY = repere.position.y + repere.size.height / 2;
+    setViewport((prev) => ({
+      ...prev,
+      x: -centerX * prev.scale,
+      y: -centerY * prev.scale,
+    }));
+  };
+
   return (
     <div
       className={`flex-1 flex items-center w-full h-full border flex-col ${className}`}
     >
+      {/* Barre de recherche repère */}
+      <RepereSearchBar onFocusRepere={focusRepere} />
+
       {/* Zone canvas principale */}
       <div
         ref={containerRef}

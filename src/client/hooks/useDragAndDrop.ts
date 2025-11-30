@@ -36,6 +36,7 @@ export const useDragAndDrop = (
     newPosition: { x: number; y: number },
   ) => void,
   onFileUpload?: (files: FileList, position: { x: number; y: number }) => void,
+  scale: number = 1,
 ): UseDragAndDropReturn => {
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
@@ -118,8 +119,8 @@ export const useDragAndDrop = (
       // Obtenir les coordonnées
       const coords = getEventCoordinates(event);
 
-      const deltaX = coords.x - dragStartRef.current.x;
-      const deltaY = coords.y - dragStartRef.current.y;
+      const deltaX = (coords.x - dragStartRef.current.x) / scale;
+      const deltaY = (coords.y - dragStartRef.current.y) / scale;
 
       const newPosition = {
         x: dragState.startPosition.x + deltaX,
