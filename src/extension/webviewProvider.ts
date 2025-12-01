@@ -183,37 +183,24 @@ export class CanvasWebviewProvider {
 
   /**
    * Generate HTML content for the WebView
-   * Loads the React app from bundled assets or connects to the dev server
+   * Loads the React app from the server via iframe
    * Requirement 2.1: Display the React application
    * Requirement 2.2: Maintain WebSocket connectivity
    */
   private getHtmlContent(webview: vscode.Webview): string {
-    // Server URL for WebSocket connection
+    // Server URL
     const serverUrl = `http://localhost:${this.serverPort}`;
 
-    // Path to bundled client assets
-    // In production, assets are in dist/client
-    const distClientPath = vscode.Uri.joinPath(this.extensionUri, 'dist', 'client');
-    
-    // Get URIs for bundled assets
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(distClientPath, 'assets', 'index.js')
-    );
-    const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(distClientPath, 'assets', 'index.css')
-    );
-
-    // Use a nonce to only allow specific scripts to run
+    // Use a nonce for inline scripts
     const nonce = getNonce();
 
     // Content Security Policy
-    // Allow connections to localhost for WebSocket
+    // Allow iframe to load from localhost server
     const csp = [
       `default-src 'none'`,
-      `style-src ${webview.cspSource} 'unsafe-inline'`,
+      `style-src 'unsafe-inline'`,
       `script-src 'nonce-${nonce}'`,
-      `font-src ${webview.cspSource}`,
-      `img-src ${webview.cspSource} data: blob:`,
+      `frame-src ${serverUrl}`,
       `connect-src ${serverUrl} ws://localhost:${this.serverPort}`,
     ].join('; ');
 
@@ -224,14 +211,19 @@ export class CanvasWebviewProvider {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="${csp}">
   <title>Local Workspace Canvas</title>
-  <link rel="stylesheet" href="${styleUri}">
   <style>
-    html, body, #root {
+    html, body {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
+    }
+    
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
     
     .loading-container {
@@ -262,90 +254,44 @@ export class CanvasWebviewProvider {
       margin-top: 16px;
       font-size: 14px;
     }
-    
-    .error-container {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      color: var(--vscode-errorForeground, #f44336);
-      background: var(--vscode-editor-background, #fff);
-      padding: 20px;
-      text-align: center;
-    }
-    
-    .error-container.visible {
-      display: flex;
-    }
-    
-    .retry-button {
-      margin-top: 16px;
-      padding: 8px 16px;
-      background: var(--vscode-button-background, #0066b8);
-      color: var(--vscode-button-foreground, #fff);
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    
-    .retry-button:hover {
-      background: var(--vscode-button-hoverBackground, #0055a0);
-    }
   </style>
 </head>
 <body>
-  <div id="root">
-    <div class="loading-container" id="loading">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Loading canvas...</div>
-    </div>
+  <div class="loading-container" id="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading canvas...</div>
   </div>
   
-  <div class="error-container" id="error">
-    <h2>Failed to load canvas</h2>
-    <p id="error-message">The server may not be running.</p>
-    <button class="retry-button" onclick="retryLoad()">Retry</button>
-  </div>
+  <iframe id="canvas-frame" src="${serverUrl}" style="display:none;"></iframe>
   
   <script nonce="${nonce}">
     // VS Code API for communication with extension
     const vscode = acquireVsCodeApi();
     
-    // Server configuration
-    window.__LOCAL_WORKSPACE_CONFIG__ = {
-      serverUrl: '${serverUrl}',
-      wsUrl: 'ws://localhost:${this.serverPort}',
-      isVSCodeWebview: true
-    };
-    
     // Notify extension that WebView is ready
     vscode.postMessage({ type: 'ready' });
     
-    // Error handling
-    function showError(message) {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('error').classList.add('visible');
-      document.getElementById('error-message').textContent = message;
-      vscode.postMessage({ type: 'error', data: message });
-    }
+    // Show iframe when loaded
+    const iframe = document.getElementById('canvas-frame');
+    const loading = document.getElementById('loading');
     
-    function retryLoad() {
-      document.getElementById('error').classList.remove('visible');
-      document.getElementById('loading').style.display = 'flex';
-      location.reload();
-    }
-    
-    // Handle script load errors
-    window.onerror = function(message, source, lineno, colno, error) {
-      showError('Script error: ' + message);
-      return true;
+    iframe.onload = function() {
+      loading.style.display = 'none';
+      iframe.style.display = 'block';
     };
+    
+    iframe.onerror = function() {
+      loading.innerHTML = '<div class="loading-text" style="color: var(--vscode-errorForeground);">Failed to load canvas. Make sure the server is running.</div>';
+      vscode.postMessage({ type: 'error', data: 'Failed to load iframe' });
+    };
+    
+    // Timeout after 10 seconds
+    setTimeout(function() {
+      if (loading.style.display !== 'none') {
+        loading.innerHTML = '<div class="loading-text" style="color: var(--vscode-errorForeground);">Loading timeout. The server may not be responding.</div>';
+      }
+    }, 10000);
   </script>
-  
-  <script nonce="${nonce}" src="${scriptUri}" type="module"></script>
 </body>
 </html>`;
   }

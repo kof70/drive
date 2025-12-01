@@ -5,6 +5,7 @@
 import { Server as HttpServer } from 'http';
 import { WebSocketService } from '../websocket';
 import { UserSession, CanvasElement, ClipboardData, CursorPosition } from '../../../shared/types';
+import { DatabaseService } from '../database';
 
 // Mock Socket.io
 const mockSocket = {
@@ -37,12 +38,22 @@ jest.mock('socket.io', () => ({
 describe('WebSocketService', () => {
   let httpServer: HttpServer;
   let wsService: WebSocketService;
+  let mockDb: jest.Mocked<DatabaseService>;
   let connectionHandler: Function;
   let disconnectHandler: Function;
 
   beforeEach(() => {
     httpServer = new HttpServer();
-    wsService = new WebSocketService(httpServer);
+    
+    // Mock DatabaseService
+    mockDb = {
+      getCanvasElements: jest.fn().mockResolvedValue([]),
+      saveCanvasElement: jest.fn().mockResolvedValue(undefined),
+      deleteCanvasElement: jest.fn().mockResolvedValue(undefined),
+      clearCanvas: jest.fn().mockResolvedValue(undefined),
+    } as any;
+    
+    wsService = new WebSocketService(httpServer, mockDb);
     
     // Récupérer le handler de connexion
     connectionHandler = mockIo.on.mock.calls.find(call => call[0] === 'connection')?.[1];

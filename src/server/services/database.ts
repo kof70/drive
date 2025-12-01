@@ -1,15 +1,20 @@
-import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 import { CanvasElement } from "../../shared/types";
 import { logger } from "../utils/logger";
 
+/**
+ * Simple JSON-based database service
+ * No native dependencies - works everywhere
+ */
 export class DatabaseService {
-  private db: Database.Database;
   private dbPath: string;
+  private elements: Map<string, CanvasElement>;
+  private saveTimeout: NodeJS.Timeout | null = null;
 
-  constructor(dbPath: string = "./data/workspace.db") {
+  constructor(dbPath: string = "./data/workspace.json") {
     this.dbPath = dbPath;
+    this.elements = new Map();
 
     // Créer le dossier data s'il n'existe pas
     const dataDir = path.dirname(dbPath);
@@ -18,94 +23,67 @@ export class DatabaseService {
       logger.info(`📁 Dossier de données créé: ${dataDir}`);
     }
 
-    // Initialiser la base de données
-    this.db = new Database(dbPath);
-    this.db.pragma("journal_mode = WAL"); // Write-Ahead Logging pour de meilleures performances
+    // Charger les données existantes
+    this.loadFromDisk();
 
     logger.info(`💾 Base de données initialisée: ${dbPath}`);
-
-    // Créer les tables
-    this.initializeTables();
   }
 
   /**
-   * Initialise les tables de la base de données
+   * Charge les données depuis le disque
    */
-  private initializeTables(): void {
-    // Table pour les éléments du canvas
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS canvas_elements (
-        id TEXT PRIMARY KEY,
-        type TEXT NOT NULL,
-        position_x REAL NOT NULL,
-        position_y REAL NOT NULL,
-        size_width REAL NOT NULL,
-        size_height REAL NOT NULL,
-        content TEXT,
-        metadata TEXT NOT NULL,
-        style TEXT,
-        created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL
-      )
-    `);
+  private loadFromDisk(): void {
+    try {
+      if (fs.existsSync(this.dbPath)) {
+        const data = fs.readFileSync(this.dbPath, 'utf-8');
+        const elements = JSON.parse(data) as CanvasElement[];
+        this.elements = new Map(elements.map(el => [el.id, el]));
+        logger.info(`✅ ${this.elements.size} éléments chargés depuis la base de données`);
+      } else {
+        logger.info('✅ Nouvelle base de données créée');
+      }
+    } catch (error) {
+      logger.error('❌ Erreur lors du chargement de la base de données:', error as Error);
+      this.elements = new Map();
+    }
+  }
 
-    // Index pour améliorer les performances
-    this.db.exec(`
-      CREATE INDEX IF NOT EXISTS idx_canvas_elements_type
-      ON canvas_elements(type)
-    `);
+  /**
+   * Sauvegarde sur le disque (debounced)
+   */
+  private saveToDisk(): void {
+    // Debounce: attendre 1 seconde avant de sauvegarder
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
 
-    this.db.exec(`
-      CREATE INDEX IF NOT EXISTS idx_canvas_elements_updated
-      ON canvas_elements(updated_at)
-    `);
-
-    logger.info("✅ Tables de base de données créées/vérifiées");
+    this.saveTimeout = setTimeout(() => {
+      try {
+        const elements = Array.from(this.elements.values());
+        fs.writeFileSync(this.dbPath, JSON.stringify(elements, null, 2), 'utf-8');
+        logger.debug(`💾 ${elements.length} éléments sauvegardés sur le disque`);
+      } catch (error) {
+        logger.error('❌ Erreur lors de la sauvegarde:', error as Error);
+      }
+    }, 1000);
   }
 
   /**
    * Sauvegarde un élément du canvas
    */
   public saveElement(element: CanvasElement): void {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO canvas_elements
-      (id, type, position_x, position_y, size_width, size_height, content, metadata, style, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const now = Date.now();
-    const createdAt = element.metadata.createdAt
-      ? new Date(element.metadata.createdAt).getTime()
-      : now;
-
-    stmt.run(
-      element.id,
-      element.type,
-      element.position.x,
-      element.position.y,
-      element.size.width,
-      element.size.height,
-      typeof element.content === "object"
-        ? JSON.stringify(element.content)
-        : element.content,
-      JSON.stringify(element.metadata),
-      element.style ? JSON.stringify(element.style) : null,
-      createdAt,
-      now,
-    );
+    this.elements.set(element.id, element);
+    this.saveToDisk();
   }
 
   /**
-   * Sauvegarde plusieurs éléments en une transaction
+   * Sauvegarde plusieurs éléments
    */
   public saveElements(elements: CanvasElement[]): void {
-    const saveMany = this.db.transaction((elements: CanvasElement[]) => {
-      for (const element of elements) {
-        this.saveElement(element);
-      }
-    });
-
-    saveMany(elements);
+    for (const element of elements) {
+      this.elements.set(element.id, element);
+    }
+    this.saveToDisk();
     logger.debug(`💾 ${elements.length} éléments sauvegardés`);
   }
 
@@ -113,44 +91,34 @@ export class DatabaseService {
    * Récupère un élément par son ID
    */
   public getElement(id: string): CanvasElement | null {
-    const stmt = this.db.prepare(`
-      SELECT * FROM canvas_elements WHERE id = ?
-    `);
-
-    const row = stmt.get(id) as any;
-    if (!row) return null;
-
-    return this.rowToElement(row);
+    return this.elements.get(id) || null;
   }
 
   /**
    * Récupère tous les éléments du canvas
    */
   public getAllElements(): CanvasElement[] {
-    const stmt = this.db.prepare(`
-      SELECT * FROM canvas_elements ORDER BY created_at ASC
-    `);
-
-    const rows = stmt.all() as any[];
-    return rows.map((row) => this.rowToElement(row));
+    return Array.from(this.elements.values()).sort((a, b) => {
+      const aTime = a.metadata.createdAt ? new Date(a.metadata.createdAt).getTime() : 0;
+      const bTime = b.metadata.createdAt ? new Date(b.metadata.createdAt).getTime() : 0;
+      return aTime - bTime;
+    });
   }
 
   /**
    * Supprime un élément
    */
   public deleteElement(id: string): void {
-    const stmt = this.db.prepare(`
-      DELETE FROM canvas_elements WHERE id = ?
-    `);
-
-    stmt.run(id);
+    this.elements.delete(id);
+    this.saveToDisk();
   }
 
   /**
    * Supprime tous les éléments
    */
   public clearAllElements(): void {
-    this.db.exec("DELETE FROM canvas_elements");
+    this.elements.clear();
+    this.saveToDisk();
     logger.info("🗑️  Tous les éléments supprimés");
   }
 
@@ -158,33 +126,7 @@ export class DatabaseService {
    * Compte le nombre d'éléments
    */
   public countElements(): number {
-    const stmt = this.db.prepare(`
-      SELECT COUNT(*) as count FROM canvas_elements
-    `);
-
-    const result = stmt.get() as { count: number };
-    return result.count;
-  }
-
-  /**
-   * Convertit une ligne de base de données en CanvasElement
-   */
-  private rowToElement(row: any): CanvasElement {
-    return {
-      id: row.id,
-      type: row.type,
-      position: {
-        x: row.position_x,
-        y: row.position_y,
-      },
-      size: {
-        width: row.size_width,
-        height: row.size_height,
-      },
-      content: row.content,
-      metadata: JSON.parse(row.metadata),
-      style: row.style ? JSON.parse(row.style) : undefined,
-    };
+    return this.elements.size;
   }
 
   /**
@@ -192,7 +134,7 @@ export class DatabaseService {
    */
   public backup(backupPath?: string): string {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const defaultBackupPath = `./data/backups/workspace-${timestamp}.db`;
+    const defaultBackupPath = `./data/backups/workspace-${timestamp}.json`;
     const finalBackupPath = backupPath || defaultBackupPath;
 
     // Créer le dossier de backup s'il n'existe pas
@@ -202,7 +144,7 @@ export class DatabaseService {
     }
 
     // Copier la base de données
-    this.db.backup(finalBackupPath);
+    fs.copyFileSync(this.dbPath, finalBackupPath);
 
     logger.info(`💾 Backup créé: ${finalBackupPath}`);
     return finalBackupPath;
@@ -212,7 +154,18 @@ export class DatabaseService {
    * Ferme la connexion à la base de données
    */
   public close(): void {
-    this.db.close();
+    // Sauvegarder immédiatement avant de fermer
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
+    
+    try {
+      const elements = Array.from(this.elements.values());
+      fs.writeFileSync(this.dbPath, JSON.stringify(elements, null, 2), 'utf-8');
+    } catch (error) {
+      logger.error('❌ Erreur lors de la sauvegarde finale:', error as Error);
+    }
+    
     logger.info("💾 Base de données fermée");
   }
 
@@ -224,11 +177,17 @@ export class DatabaseService {
     dbSize: number;
     dbPath: string;
   } {
-    const stats = fs.statSync(this.dbPath);
+    let dbSize = 0;
+    try {
+      const stats = fs.statSync(this.dbPath);
+      dbSize = stats.size;
+    } catch (error) {
+      // File doesn't exist yet
+    }
 
     return {
       elementCount: this.countElements(),
-      dbSize: stats.size,
+      dbSize,
       dbPath: this.dbPath,
     };
   }

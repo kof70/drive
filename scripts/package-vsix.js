@@ -22,9 +22,11 @@ if (!fs.existsSync(packageJsonPath)) {
 }
 
 try {
-  // Run vsce package from dist directory
+  // Run vsce package from dist directory using local installation
   console.log('Running vsce package...');
-  execSync('npx @vscode/vsce package --no-dependencies --allow-missing-repository', {
+  const vscePath = path.join(rootDir, 'node_modules', '@vscode', 'vsce', 'vsce');
+  const relativeVscePath = path.relative(distDir, vscePath);
+  execSync(`node "${relativeVscePath}" package --allow-missing-repository`, {
     cwd: distDir,
     stdio: 'inherit'
   });

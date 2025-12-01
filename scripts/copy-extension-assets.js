@@ -217,7 +217,23 @@ This extension is designed for trusted local networks only. Do not expose to the
 fs.writeFileSync(readmeDest, extensionReadme);
 console.log(`  ✓ Extension README.md created`);
 
+// Install dependencies in dist folder
+console.log('\nInstalling dependencies in dist:');
+const { execSync } = require('child_process');
+
+try {
+  // Install dependencies using npm (vsce expects npm)
+  execSync('npm install --production --no-package-lock', {
+    cwd: distDir,
+    stdio: 'inherit'
+  });
+  console.log('  ✓ Dependencies installed (no native modules needed)');
+} catch (error) {
+  console.error('  ✗ Failed to install dependencies:', error.message);
+  process.exit(1);
+}
+
 console.log('\n✅ Extension assets prepared successfully!');
 console.log('\nNext steps:');
-console.log('  cd dist && vsce package --no-dependencies');
+console.log('  cd dist && vsce package');
 console.log('  # or: pnpm package:extension');

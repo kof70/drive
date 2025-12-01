@@ -32,8 +32,12 @@ components.json
 **/__mocks__/**
 *.test.ts
 *.test.tsx
+*.test.js
+*.test.jsx
 *.spec.ts
 *.spec.tsx
+*.spec.js
+*.spec.jsx
 
 # Development data
 data/**
@@ -43,10 +47,13 @@ workspace-data/**
 node_modules/**
 pnpm-lock.yaml
 package-lock.json
+yarn.lock
 
-# Build artifacts we don't need
+# Build artifacts we don't need in package
 *.vsix
 *.map
+*.d.ts
+*.d.ts.map
 
 # Misc
 *.log
@@ -55,3 +62,6 @@ Thumbs.db
 
 # Root package.json (we use package.extension.json copied as package.json)
 package.extension.json
+
+# Development scripts
+setupTests.ts

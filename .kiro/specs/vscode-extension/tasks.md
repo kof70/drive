@@ -70,15 +70,23 @@
     - Ensure server can find bundled client assets
     - _Requirements: 7.2, 7.3_
 
-- [-] 10. Setup build and packaging
-  - [ ] 10.1 Create build scripts
+- [x] 10. Setup build and packaging
+
+
+
+
+  - [x] 10.1 Create build scripts
+
+
     - Add npm script to build extension with esbuild
     - Add npm script to copy server dist and client assets
     - Add npm script to package as .vsix using vsce
     - Update .vscodeignore to exclude source files
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-- [ ] 10.2 Write integration tests
+- [x] 10.2 Write integration tests
+
+
     - Test extension activation
     - Test server start/stop commands
     - Test WebView creation
