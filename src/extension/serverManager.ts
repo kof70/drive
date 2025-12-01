@@ -398,6 +398,22 @@ export class ServerManager extends EventEmitter {
       }
     }
 
-    return urls;
+    // Sort URLs to prioritize 192.168.x.x addresses (home/office networks)
+    return urls.sort((a, b) => {
+      const aIs192 = a.includes('192.168.');
+      const bIs192 = b.includes('192.168.');
+      
+      if (aIs192 && !bIs192) return -1;
+      if (!aIs192 && bIs192) return 1;
+      
+      // Also prioritize 10.x.x.x (private networks)
+      const aIs10 = a.includes('://10.');
+      const bIs10 = b.includes('://10.');
+      
+      if (aIs10 && !bIs10) return -1;
+      if (!aIs10 && bIs10) return 1;
+      
+      return 0;
+    });
   }
 }
