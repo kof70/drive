@@ -1,5 +1,7 @@
 import { useCanvasStore } from "@/client/stores/canvasStore";
 import React, { useState } from "react";
+import { Input } from "../../ui/input";
+import { MapPin, PinIcon } from "lucide-react";
 
 interface RepereSearchBarProps {
   onFocusRepere: (repereId: string) => void;
@@ -42,26 +44,30 @@ export const RepereSearchBar: React.FC<RepereSearchBarProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 p-2 bg-background rounded shadow w-72 absolute top-4 left-1/2 -translate-x-1/2 z-50">
-      <input
+    <div className="flex flex-col gap-2 p-2 w-72 absolute top-4 left-1/2 -translate-x-1/2 z-50">
+      <Input
         type="text"
         placeholder="Rechercher un repère par nom..."
         value={query}
         onChange={handleSearch}
-        className="border p-2 rounded"
+        className="border bg-background rounded-full  p-2s"
       />
       {results.length > 0 && (
-        <ul className="bg-white rounded shadow p-2 max-h-48 overflow-y-auto">
+        <ul className="bg-white rounded-xl shadow p-1 max-h-48 overflow-y-auto">
           {results.map((r) => (
             <li
               key={r.id}
-              className="cursor-pointer hover:bg-blue-100 p-1 rounded"
+              className="cursor-pointer flex items-center gap-2 hover:bg-blue-100 text-sm p-1 rounded-lg"
               onClick={() => {
                 onFocusRepere(r.id);
                 setQuery("");
                 setResults([]);
               }}
+              style={{
+                color:r.style.borderColor
+              }}
             >
+              <MapPin size={16} style={{ fill:r.style.backgroundColor, borderColor:r.style.borderColor }}/>
               {getRepereName(r)}
             </li>
           ))}
