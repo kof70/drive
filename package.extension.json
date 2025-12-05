@@ -3,14 +3,11 @@
   "displayName": "Local Collaborative Workspace",
   "description": "Real-time collaborative canvas for local networks - share files, notes, and organize content visually without internet connectivity",
   "version": "1.0.0",
-  "publisher": "local-collaborative-workspace",
+  "publisher": "kof70",
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": [
-    "Other",
-    "Visualization"
-  ],
+  "categories": ["Other", "Visualization"],
   "keywords": [
     "collaborative",
     "workspace",
@@ -79,7 +76,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/local-collaborative-workspace/local-collaborative-workspace"
+    "url": "https://github.com/kof70/drive"
   },
   "license": "MIT"
 }
